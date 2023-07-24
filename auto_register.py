@@ -14,8 +14,8 @@ options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6)
  
 # 1. Login
 browser.get("https://keyzard.org/login")
-keyzard_id = "XXXXX"    # <--- Your Naver blog ID
-keyzard_pw = "XXXXX"    # <--- Your Naver blog password (same as your main Naver account)
+keyzard_id = "XXXXXXXXXXXXXX"    # <--- Your Naver blog ID
+keyzard_pw = "XXXXXXXXXXXXXX"    # <--- Your Naver blog password (same as your main Naver account)
 
 browser.find_element("id", "id").send_keys(keyzard_id)
 browser.find_element("id", "pw").send_keys(keyzard_pw)
@@ -33,45 +33,25 @@ with open(file_path, "r") as f:
     line_count = sum(1 for _ in f)
 
 # second, proceed!
-failed_url = []
+browser.execute_script("window.alert = function() {};")     # disable alert, it's very annoying to deal with Selenium.
+
 try:
     with open(file_path, 'r') as file:
         progress = 1
 
         for line in file:
 
-            sleep(random.uniform(1, 5))
+            sleep(random.uniform(1, 1.5))    # adjust this sleep() interval if you want, but don't lower it too much! The website would ban you.
 
             try_url = line.strip()
             browser.find_element("id", "blogUrl").send_keys(try_url)
             browser.find_element("id", "submit").click()
 
-            wait = WebDriverWait(browser, 60)
-            alert = wait.until(expected_conditions.alert_is_present())
-            
-            if alert.text == "등록되었습니다." or alert.text == "URL이 잘못되었습니다.":
-                alert.accept()
-                print(f"Processed [{progress}/{line_count}]({round(progress * 100/line_count, 2)}%) : {try_url}")
-                progress += 1
-
-                # sometimes, we need to click alert() more to proceed due to site problems.
-                try:
-                    retry = 0
-                    while True:
-                        if retry > 0:
-                            print(f"Stucked. Try to resolve any remaining alerts... {retry}")
-                        alert = browser.switch_to.alert
-                        alert.accept()
-                        retry += 1
-                        sleep(1)
-                except:
-                    continue
-            else:
-                print(f"error from alert... [{alert.text}]")
-                break
+            print(f"Processed [{progress}/{line_count}]({round(progress * 100/line_count, 2)}%) : {try_url}")
+            progress += 1
 
 
-    print(f"Every URL has been processed. There are some URLs failed... {failed_url}")
+    print(f"Every URL has been processed.")
 except FileNotFoundError:
     print(f"Error: The file '{file_path}' does not exist.")
 except IOError:
